@@ -69,6 +69,6 @@ You can also use msfvenom to generate a meterpreter (reverse_https only ATM) on 
 - -msf / --msfvenom : use msf
 - -lhost / --lhost : your IP
 - -lport / --lport : your PORT
-- -rc / --rc : run the resource file in msfconsole with your current user (obviously, it won't work as non-privileged user on port 1024)
+- -rc / --rc : run the resource file in msfconsole with your current user (obviously, it won't work as non-privileged user on port < 1024)
 
 [SCREENSHOT SHELLCODE MSF / RC] 
