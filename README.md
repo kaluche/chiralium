@@ -71,3 +71,10 @@ You can also use msfvenom to generate a meterpreter (reverse_https only ATM) on 
 - -rc / --rc : run the resource file in msfconsole with your current user (obviously, it won't work as non-privileged user on port < 1024)
 
 <img src="screenshots/msf_rc.PNG" width="40%">
+
+## Todo
+- Add persistence
+- Add a bypass for UAC
+- Add another way to exec the shellcode
+- Add the support of Linux shellcode exec (or may be not, I don't care about it)
+- Allow the user to choose his full path for "output" and not only "chiralium/output/" (yeah, it's trivial, but hey)
