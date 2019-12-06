@@ -1,6 +1,6 @@
 # chiralium
 ## Description
-Just a simple tool to generate binary from shellcode with Golang. Of course, you need to be able to "go build". You can also either specify your own shellcode or use msfvenom to generate a meterpreter reverse_https (x86 or x64) on the fly. In order to avoid static shellcode detection, the shellcode is stored encrypt with AES (unique random key / iv are generate at each compilation) in the go file, and next compiled and decrypted on execution. A resource file for metasploit is also created, because i'm too lazy to run it manually.
+Just a simple tool to generate binary from shellcode with Golang. Of course, you need to be able to "go build". You can also either specify your own shellcode or use msfvenom to generate a meterpreter reverse_https (x86 or x64) on the fly. In order to avoid static shellcode detection, the shellcode is stored encrypt with AES (unique random key / iv are generate at each compilation) in the go file, and next compiled and decrypted on execution. A resource file for metasploit is also created, because i'm too lazy to run it manually. I take no credit for anything, just using stuff from many places.
 
 At this moment, you can :
 - only compile windows shellcode
@@ -16,6 +16,30 @@ Components required :
 
 Optional components :
 - metasploit 
+
+Install python3 packages
+```
+$ sudo apt-get install git wget python3 python3-pip
+```
+
+ Install requirements
+```
+$ git clone https://github.com/kaluche/chiralium
+$ cd chiralium
+$ pip3 install -r requirements.txt
+```
+
+Install go (see here for details https://golang.org/doc/install or just search...it's easy).
+```
+$ wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz
+$ sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
+$ export PATH=$PATH:/usr/local/go/bin
+(to be persistent, add it to your $HOME/.profile )
+$ go version
+go version go1.13.5 linux/amd64
+$ python3 chiralium.py -t # should be good
+```
+
 
 ## Usage 
 
