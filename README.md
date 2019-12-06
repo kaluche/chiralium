@@ -7,7 +7,7 @@ At this moment, you can :
 - compile for x86 or x64 architecture
 - execute your shellcode with a syscall
 
-This program was test on Linux and python3.
+This program was tested on Linux and python3.
 
 ## Installation
 Components required :
