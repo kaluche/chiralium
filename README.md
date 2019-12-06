@@ -17,19 +17,19 @@ Components required :
 Optional components :
 - metasploit 
 
-Install python3 packages
+Install python3 packages :
 ```
 $ sudo apt-get install git wget python3 python3-pip
 ```
 
- Install requirements
+ Install requirements :
 ```
 $ git clone https://github.com/kaluche/chiralium
 $ cd chiralium
 $ pip3 install -r requirements.txt
 ```
 
-Install go (see here for details https://golang.org/doc/install or just search...it's easy).
+Install go (see here for details https://golang.org/doc/install or just search...it's easy) :
 ```
 $ wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz
 $ sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
@@ -39,7 +39,6 @@ $ go version
 go version go1.13.5 linux/amd64
 $ python3 chiralium.py -t # should be good
 ```
-
 
 ## Usage 
 
