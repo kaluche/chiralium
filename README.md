@@ -45,13 +45,13 @@ $ python3 chiralium.py -t # should be good
 ### First launch
 At the first launch, chiralium create missing directory and files.
 
-[SCREENSHOT FIRST LAUNCH]
+<img src="screenshots/first_launch.PNG" width="40%">
 
 ### Test mode
 
 Before anything, it's recommended to "test" that everything works with --test / -t. Shellcode inside shellcode/calc.hex will be used. It's juste a "windows/exec cmd=calc.exe" but if you don't trust me (I understand :D), put the shellcode you want inside this file.
 
-[SCREENSHOT TEST] 
+<img src="screenshots/test_mode.PNG" width="40%">
 
 ### Compile shellcode from file
 
@@ -60,7 +60,7 @@ You need to specify a shellcode that will be compiled inside the "output" direct
 - -o / --output : the name of your binary (default is random)
 - -a / --arch : the architecture you want : x86 or x64
 
-[SCREENSHOT SHELLCODE CUSTOSM COMPILATION] 
+<img src="screenshots/shellcode.PNG" width="40%"> 
 
 ### Compile shellcode from msfvenom
 
@@ -70,4 +70,4 @@ You can also use msfvenom to generate a meterpreter (reverse_https only ATM) on 
 - -lport / --lport : your PORT
 - -rc / --rc : run the resource file in msfconsole with your current user (obviously, it won't work as non-privileged user on port < 1024)
 
-[SCREENSHOT SHELLCODE MSF / RC] 
+<img src="screenshots/msf_rc.PNG" width="40%">
