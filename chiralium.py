@@ -21,9 +21,11 @@ def encrypthat(key,iv,cleartext):
 	# first, pad with  nop to be a multiple of 16 bytes
 	length = 16 - (len(cleartext) % 16)
 	cleartext += '90' * (length // 2)
-
-	obj = AES.new(key, AES.MODE_CBC, iv)
-	ciphertext = obj.encrypt(cleartext)
+	print(key)
+	obj = AES.new(str.encode(key), AES.MODE_CBC, str.encode(iv))
+	print("aaaaaa")
+	ciphertext = obj.encrypt(str.encode(cleartext))
+	print("bbb")
 	# print(binascii.hexlify(key))
 	return(ciphertext)
 
@@ -101,7 +103,6 @@ def craftbinary(shellcodefile,outputdir,biname,appdir):
 		# replace values
 		with open('{0}/src/main.go'.format(appdir),'r') as f:
 			content_go = f.read()
-
 		key = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
 		iv = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for x in range(16))
 		shellcode_encrypt = encrypthat(key,iv,shellcode)
@@ -109,6 +110,7 @@ def craftbinary(shellcodefile,outputdir,biname,appdir):
 		key = str(binascii.hexlify(key.encode()).decode('utf-8'))
 		iv = str(binascii.hexlify(iv.encode()).decode('utf-8'))
 		shellcode_encrypt = str(binascii.hexlify(shellcode_encrypt).decode('utf-8'))
+		
 
 		# print(key,iv,shellcode_encrypt)
 		print("[+] Using",colored("AES-CBC","yellow"),"with unique",colored("IV & KEY","yellow"),"to encrypt the shellcode ... ")
