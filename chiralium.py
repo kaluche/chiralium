@@ -21,11 +21,8 @@ def encrypthat(key,iv,cleartext):
 	# first, pad with  nop to be a multiple of 16 bytes
 	length = 16 - (len(cleartext) % 16)
 	cleartext += '90' * (length // 2)
-	print(key)
 	obj = AES.new(str.encode(key), AES.MODE_CBC, str.encode(iv))
-	print("aaaaaa")
 	ciphertext = obj.encrypt(str.encode(cleartext))
-	print("bbb")
 	# print(binascii.hexlify(key))
 	return(ciphertext)
 
