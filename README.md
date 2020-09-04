@@ -18,19 +18,19 @@ Optional components :
 - metasploit 
 
 Install python3 packages :
-```
+```bash
 $ sudo apt-get install git wget python3 python3-pip
 ```
 
  Install requirements :
-```
+```bash
 $ git clone https://github.com/kaluche/chiralium
 $ cd chiralium
 $ pip3 install -r requirements.txt
 ```
 
 Install go (see here for details https://golang.org/doc/install or just search...it's easy) :
-```
+```bash
 $ wget https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz
 $ sudo tar -C /usr/local -xzf go1.13.5.linux-amd64.tar.gz
 $ export PATH=$PATH:/usr/local/go/bin
@@ -71,6 +71,24 @@ You can also use msfvenom to generate a meterpreter (reverse_https only ATM) on 
 - -rc / --rc : run the resource file in msfconsole with your current user (obviously, it won't work as non-privileged user on port < 1024)
 
 <img src="screenshots/msf_rc.PNG" width="40%">
+
+### Add your own metadata
+
+I used (goversioninfo)[https://github.com/josephspurrier/goversioninfo] to generate the ".syso" files. If you want to add your own "profile", you can do that :
+
+```
+## Download goversioninfo
+go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+
+## Now copy and edit the res/versioninfo/whatyouwant.json
+
+## Add an icon (ie: res/icons/whatyouwant.ico)
+cd res/syso/
+goversioninfo -icon=../icons/whatyouwant.ico ../versioninfo/whatyouwant.json
+mv resource.syso whatyouwant.syso
+
+## You can now use "-m whatyouwant" in Chiralium
+```
 
 ## Todo
 - Add persistence

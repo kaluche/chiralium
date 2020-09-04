@@ -1,0 +1,43 @@
+{
+    "FixedFileInfo": {
+        "FileVersion": {
+            "Major": 4,
+            "Minor": 28,
+            "Patch": 0,
+            "Build": 0
+        },
+        "ProductVersion": {
+            "Major": 1,
+            "Minor": 0,
+            "Patch": 0,
+            "Build": 0
+        },
+        "FileFlagsMask": "3f",
+        "FileFlags ": "00",
+        "FileOS": "040004",
+        "FileType": "01",
+        "FileSubType": "00"
+    },
+    "StringFileInfo": {
+        "Comments": "Wallpaper text configurator",
+        "CompanyName": "Microsoft",
+        "FileDescription": "BGInfo - Wallpaper text configurator",
+        "FileVersion": "4.28.0.0",
+        "InternalName": "BGInfo",
+        "LegalCopyright": "Copyright 2000-2019 Mark Russinovich",
+        "LegalTrademarks": "",
+        "OriginalFilename": "BGInfo.exe",
+        "PrivateBuild": "",
+        "ProductName": "BGInfo",
+        "ProductVersion": "4.28",
+        "SpecialBuild": ""
+    },
+    "VarFileInfo": {
+        "Translation": {
+            "LangID": "0409",
+            "CharsetID": "04B0"
+        }
+    },
+    "IconPath": "",
+    "ManifestPath": ""
+}
