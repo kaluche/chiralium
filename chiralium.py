@@ -121,15 +121,13 @@ def craftgofile(shellcodefile,outputdir,biname,appdir,eicar):
 		content_go = content_go.replace("_IV_",iv)
 		content_go = content_go.replace("_SHELLCODE_",shellcode_encrypt)
 		if eicar == True:
+			print("[+] Using",colored("EICAR","yellow"),"pattern in binary... ")
 			eicar_var_name = ''.join(random.choice(string.ascii_lowercase) for x in range(4))
 			eicar_pattern = "X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
-			# eicar_full = """{var} := \"{pattern}\"\n\t_ = {var}""".format(var=eicar_var_name,pattern=eicar_pattern)
 			eicar_full = """{var} := \"{pattern}\"\n\tfmt.Println({var})""".format(var=eicar_var_name,pattern=eicar_pattern)
 			content_go = content_go.replace('// "__EICAR__"',eicar_full)
 		else:
 			content_go = content_go.replace('// "__EICAR__"','// main')
-		print(content_go)
-		
 		# write tmp GO file with current values.
 		# will be use to "go build"
 		with open('{0}/{1}.go'.format(outputdir,biname),'w') as f:
