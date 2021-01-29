@@ -245,7 +245,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="Chiralium : a dirty GO shellcode-to-binary generator.")
 	parser.add_argument('-p', '--platform', type=str, default=_platform, help="Platform for compilation (windows only for the moment)")
 	parser.add_argument('-sc', '--shellcode', type=str, help="File containing HEX shellcode (41414141)")
-	parser.add_argument('-m', '--metadata', type=str, default="bginfo", help="Choose metadata to add using 'syso' COFF (pre-generated with goversioninfo) : none, bginfo,putty")
+	parser.add_argument('-m', '--metadata', type=str, default="bginfo", help="Choose metadata to add using 'syso' COFF (pre-generated with goversioninfo) : none, bginfo, putty, ccleaner")
 	parser.add_argument('-s', '--signature', type=str, default="signatures/Tcpview.exe_sig", help="Choose signature file to add (default: signatures/Tcpview.exe_sig)")
 	parser.add_argument('-a', '--arch', type=str, default="x86", help="The architecture to use (x86 or x64)")
 	parser.add_argument('-t', '--test', action='store_true', default=False, help="Test to build a default shellcode that spawn a calc.")
